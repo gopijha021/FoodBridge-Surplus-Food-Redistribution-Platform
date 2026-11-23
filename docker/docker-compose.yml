@@ -1,0 +1,51 @@
+x-app: &app
+  build: { context: .., dockerfile: Dockerfile }
+  env_file: ../.env.example
+  environment: &env
+    DATABASE_URL: postgresql+psycopg://foodbridge:foodbridge@db:5432/foodbridge
+    REDIS_URL: redis://redis:6379/0
+    BROKER_URL: amqp://guest:guest@rabbitmq:5672//
+    USE_POSTGIS: "true"
+    EVENT_BACKEND: celery
+    EMBEDDED_WORKER: "false"
+    JWT_SECRET: ${JWT_SECRET:-dev-only-change-me}
+    APP_ENV: ${APP_ENV:-local}
+  depends_on:
+    db: { condition: service_healthy }
+    redis: { condition: service_started }
+    rabbitmq: { condition: service_healthy }
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment: { POSTGRES_USER: foodbridge, POSTGRES_PASSWORD: foodbridge, POSTGRES_DB: foodbridge }
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U foodbridge"], interval: 3s, retries: 20 }
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    ports: ["5672:5672", "15672:15672"]
+    healthcheck: { test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"], interval: 5s, retries: 20 }
+  migrate:
+    <<: *app
+    command: alembic upgrade head
+    restart: "no"
+  api:
+    <<: *app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+    ports: ["8000:8000"]
+    depends_on: { migrate: { condition: service_completed_successfully } }
+  worker:
+    <<: *app
+    command: celery -A app.workers.celery_app.celery_app worker --loglevel=INFO --concurrency=4
+    depends_on: { migrate: { condition: service_completed_successfully } }
+  beat:
+    <<: *app
+    command: celery -A app.workers.celery_app.celery_app beat --loglevel=INFO
+    depends_on: { migrate: { condition: service_completed_successfully } }
+
+volumes:
+  pgdata:

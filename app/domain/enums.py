@@ -1,0 +1,62 @@
+from enum import StrEnum
+
+
+class Role(StrEnum):
+    DONOR = "DONOR"
+    NGO = "NGO"
+    VOLUNTEER = "VOLUNTEER"
+    ADMIN = "ADMIN"
+
+
+class OrgType(StrEnum):
+    DONOR = "DONOR"
+    NGO = "NGO"
+
+
+class Verification(StrEnum):
+    UNVERIFIED = "UNVERIFIED"
+    PENDING = "PENDING"
+    VERIFIED = "VERIFIED"
+    REJECTED = "REJECTED"
+
+
+class DonationStatus(StrEnum):
+    DRAFT = "DRAFT"
+    PUBLISHED = "PUBLISHED"
+    RESERVED = "RESERVED"
+    RELEASED = "RELEASED"
+    ASSIGNED = "ASSIGNED"
+    REASSIGNMENT_REQUIRED = "REASSIGNMENT_REQUIRED"
+    PICKED_UP = "PICKED_UP"
+    DELIVERY_FAILED = "DELIVERY_FAILED"
+    DELIVERED = "DELIVERED"
+    DISPUTED = "DISPUTED"
+    COMPLETED = "COMPLETED"
+    EXPIRED = "EXPIRED"
+    WITHDRAWN = "WITHDRAWN"
+    CANCELLED = "CANCELLED"
+
+
+class AllocationStatus(StrEnum):
+    CONFIRMED = "CONFIRMED"
+    RELEASED = "RELEASED"
+    COMPLETED = "COMPLETED"
+    DISPUTED = "DISPUTED"
+    CANCELLED = "CANCELLED"
+
+
+class TaskStatus(StrEnum):
+    OPEN = "OPEN"
+    OFFERED = "OFFERED"
+    ACCEPTED = "ACCEPTED"
+    PICKED_UP = "PICKED_UP"
+    DELIVERED = "DELIVERED"
+    FAILED = "FAILED"
+    CANCELLED = "CANCELLED"
+
+
+class EntityType(StrEnum):
+    DONATION = "DONATION"
+    ALLOCATION = "ALLOCATION"
+    TASK = "TASK"
+    ORGANISATION = "ORGANISATION"
